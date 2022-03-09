@@ -38,6 +38,10 @@ namespace CG_Project1
                 ImageViewer.Source = bitmap;
             }
 
+            if (FilteredImage.Source != null)
+            {
+                FilteredImage.Source = null;
+            }
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
