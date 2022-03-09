@@ -40,7 +40,6 @@ namespace CG_Project1
 
         }
 
-        // later change ImageViewer to FilteredImage everywhere below
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog dlg = new SaveFileDialog
@@ -54,8 +53,8 @@ namespace CG_Project1
             {
                 var filename = dlg.FileName;
 
-                var rtb = new RenderTargetBitmap((int)ImageViewer.ActualWidth, (int)ImageViewer.ActualHeight, 96, 96, PixelFormats.Pbgra32);
-                rtb.Render(ImageViewer);
+                var rtb = new RenderTargetBitmap((int)FilteredImage.ActualWidth, (int)FilteredImage.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                rtb.Render(FilteredImage);
 
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(rtb));
@@ -67,23 +66,67 @@ namespace CG_Project1
             }
         }
 
+
+        public static BitmapSource Invert(BitmapSource source)
+        {
+            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7)/8 ;
+            int length = stride * source.PixelHeight;
+
+            // array that holds pixel data of the source image
+            byte[] pixels = new byte[length];   
+            source.CopyPixels(pixels, stride, 0);
+
+            // Change this loop for other formats
+            for (int i = 0; i < length; i += 4)
+            {
+                pixels[i] = (byte)(255 - pixels[i]); //R
+                pixels[i + 1] = (byte)(255 - pixels[i + 1]); //G
+                pixels[i + 2] = (byte)(255 - pixels[i + 2]); //B
+            }
+
+            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
+        }
+
+
+
         private void InversionButton_Click(object sender, RoutedEventArgs e)
         {
+            if(FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
+
+            FilteredImage.Source = Invert((BitmapSource)FilteredImage.Source);
 
         }
 
         private void BrightnessButton_Click(object sender, RoutedEventArgs e)
         {
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
+
 
         }
 
         private void ContrastButton_Click(object sender, RoutedEventArgs e)
         {
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
+
 
         }
 
         private void GammaButton_Click(object sender, RoutedEventArgs e)
         {
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
+
 
         }
     }
