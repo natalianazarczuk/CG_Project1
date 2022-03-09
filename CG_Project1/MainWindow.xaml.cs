@@ -37,6 +37,7 @@ namespace CG_Project1
                 BitmapImage bitmap = new BitmapImage(new Uri(selectedFileName));;
                 ImageViewer.Source = bitmap;
             }
+
         }
 
         // later change ImageViewer to FilteredImage everywhere below
@@ -66,7 +67,24 @@ namespace CG_Project1
             }
         }
 
+        private void InversionButton_Click(object sender, RoutedEventArgs e)
+        {
 
+        }
 
+        private void BrightnessButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ContrastButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void GammaButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
