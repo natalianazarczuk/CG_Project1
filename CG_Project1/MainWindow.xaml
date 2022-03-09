@@ -1,0 +1,19 @@
+﻿<Window x:Class="CG_Project1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CG_Project1"
+        mc:Ignorable="d"
+        Title="CG_Project1" Height="450" Width="800">
+
+
+    <Grid Background="#FFFDC9FD">
+        <Image x:Name="ImageViewer" HorizontalAlignment="Left" Height="259" Margin="25,25,0,0" VerticalAlignment="Top" Width="336"/>
+        <Button x:Name="LoadButton" Content="Load" HorizontalAlignment="Left" Margin="25,310,0,0" VerticalAlignment="Top" Width="57" Height="33" BorderBrush="{x:Null}" Click="LoadButton_Click" Background="#FF7C007C" Foreground="#FFFDC9FD"/>
+        <Button x:Name="SaveButton" Content="Save" HorizontalAlignment="Left" Margin="25,362,0,0" VerticalAlignment="Top" Width="57" Height="33" Background="#FF7C007C" BorderBrush="{x:Null}" Foreground="#FFFDC9FD" Click="SaveButton_Click"/>
+        <Image x:Name="FilteredImage" HorizontalAlignment="Left" Height="259" Margin="438,25,0,0" VerticalAlignment="Top" Width="337"/>
+    </Grid>
+
+
+</Window>
