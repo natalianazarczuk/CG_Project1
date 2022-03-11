@@ -191,5 +191,30 @@ namespace CG_Project1
 
             FilteredImage.Source = Gamma((BitmapSource)FilteredImage.Source, 20);
         }
+
+        private void Emboss_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void EdgeDetection_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Sharpen_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void GaussianBlur_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Blur_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
