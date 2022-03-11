@@ -80,18 +80,74 @@ namespace CG_Project1
             byte[] pixels = new byte[length];   
             source.CopyPixels(pixels, stride, 0);
 
-            // Change this loop for other formats
-            for (int i = 0; i < length; i += 4)
+            for (int i = 0; i < length; i+=4)
             {
-                pixels[i] = (byte)(255 - pixels[i]); //R
-                pixels[i + 1] = (byte)(255 - pixels[i + 1]); //G
-                pixels[i + 2] = (byte)(255 - pixels[i + 2]); //B
+                pixels[i] = (byte)(255 - pixels[i]);
+                pixels[i+1] = (byte)(255 - pixels[i+1]);
+                pixels[i+2] = (byte)(255 - pixels[i+2]);
             }
 
             return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
         }
 
 
+        public static BitmapSource Brighten(BitmapSource source, int brightness_factor)
+        {
+            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
+            int length = stride * source.PixelHeight;
+
+            byte[] pixels = new byte[length];
+            source.CopyPixels(pixels, stride, 0);
+            
+            for (int i = 0; i < length; i +=4)
+            {
+                pixels[i] = (byte)((pixels[i] + brightness_factor > 255) ? 255 : ((pixels[i] + brightness_factor < 0) ? 0 : pixels[i] + brightness_factor));
+                pixels[i+1] = (byte)((pixels[i+1] + brightness_factor > 255) ? 255 : ((pixels[i+1] + brightness_factor < 0) ? 0 : pixels[i+1] + brightness_factor));
+                pixels[i+2] = (byte)((pixels[i+2] + brightness_factor > 255) ? 255 : ((pixels[i+2] + brightness_factor < 0) ? 0 : pixels[i+2] + brightness_factor));
+
+            }
+
+            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
+        }
+
+
+        public static BitmapSource Contrast(BitmapSource source, int contrast)
+        {
+            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
+            int length = stride * source.PixelHeight;
+
+            byte[] pixels = new byte[length];
+            source.CopyPixels(pixels, stride, 0);
+
+            int factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+            for (int i = 0; i < length; i += 4)
+            {
+                pixels[i] = (byte)((factor * (pixels[i] - 128) + 128 > 255) ? 255 : ((factor * (pixels[i] - 128) + 128 < 0) ? 0 : factor * (pixels[i] - 128) + 128));
+                pixels[i+1] = (byte)((factor * (pixels[i+1] - 128) + 128 > 255) ? 255 : ((factor * (pixels[i+1] - 128) + 128 < 0) ? 0 : factor * (pixels[i+1] - 128) + 128));
+                pixels[i+2] = (byte)((factor * (pixels[i+2] - 128) + 128 > 255) ? 255 : ((factor * (pixels[i+2] - 128) + 128 < 0) ? 0 : factor * (pixels[i+2] - 128) + 128));
+            }
+
+            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
+        }
+
+        public static BitmapSource Gamma(BitmapSource source, double gamma)
+        {
+            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
+            int length = stride * source.PixelHeight;
+
+            byte[] pixels = new byte[length];
+            source.CopyPixels(pixels, stride, 0);
+
+            for (int i = 0; i < length; i += 4)
+            {
+                pixels[i] = (byte)(Math.Pow(pixels[i] / 255.0f, 1 / gamma) * 255);
+                pixels[i + 1] = (byte)(Math.Pow(pixels[i + 1] / 255.0f, 1 / gamma) * 255);
+                pixels[i + 2] = (byte)(Math.Pow(pixels[i + 2] / 255.0f, 1 / gamma) * 255);
+            }
+
+            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
+        }
 
         private void InversionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -111,6 +167,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
+            FilteredImage.Source = Brighten((BitmapSource)FilteredImage.Source, 10);
 
         }
 
@@ -121,6 +178,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
+            FilteredImage.Source = Contrast((BitmapSource)FilteredImage.Source, 128);
 
         }
 
@@ -131,7 +189,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-
+            FilteredImage.Source = Gamma((BitmapSource)FilteredImage.Source, 20);
         }
     }
 }
