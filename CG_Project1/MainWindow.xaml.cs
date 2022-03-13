@@ -2,8 +2,11 @@
 using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -192,29 +195,61 @@ namespace CG_Project1
             FilteredImage.Source = Gamma((BitmapSource)FilteredImage.Source, 20);
         }
 
-        private void Emboss_Click(object sender, RoutedEventArgs e)
+        private void Blur_Click(object sender, RoutedEventArgs e)
         {
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
+
+            var blur_filter = new BlurFilter();
+            FilteredImage.Source = ((BitmapSource)FilteredImage.Source).ConvolutionFilter(blur_filter);
+        }
+        private void GaussianBlur_Click(object sender, RoutedEventArgs e)
+        {
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
+
+            var gauss_filter = new GaussianBlurFilter();
+            FilteredImage.Source = ((BitmapSource)FilteredImage.Source).ConvolutionFilter(gauss_filter);
+        }
+
+        private void Sharpen_Click(object sender, RoutedEventArgs e)
+        {
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
+
+            var sharp_filter = new SharpenFilter();
+            FilteredImage.Source = ((BitmapSource)FilteredImage.Source).ConvolutionFilter(sharp_filter);
 
         }
 
         private void EdgeDetection_Click(object sender, RoutedEventArgs e)
         {
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
 
+            var edge_filter = new EdgeDetectionFilter();
+            FilteredImage.Source = ((BitmapSource)FilteredImage.Source).ConvolutionFilter(edge_filter);
         }
 
-        private void Sharpen_Click(object sender, RoutedEventArgs e)
+
+        private void Emboss_Click(object sender, RoutedEventArgs e)
         {
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
 
+            var emboss_filter = new EmbossFilter();
+            FilteredImage.Source = ((BitmapSource)FilteredImage.Source).ConvolutionFilter(emboss_filter);
         }
 
-        private void GaussianBlur_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Blur_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }
