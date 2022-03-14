@@ -3,25 +3,47 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CG_Project1"
+        xmlns:local="clr-namespace:CG_Project1" xmlns:DVC="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         mc:Ignorable="d"
-        Title="CG_Project1" Height="450" Width="800">
+        Title="CG_Project1" Height="500" Width="950">
 
 
     <Grid Background="White" >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="1*" />
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <GroupBox Header="Source" Grid.Column="0" Foreground="#FF7C007C" BorderBrush="#FF7C007C" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Header="Source" Grid.RowSpan="2" Grid.Column="0" Foreground="#FF7C007C" BorderBrush="#FF7C007C" >
             <Image x:Name="ImageViewer" />
         </GroupBox>
-        <GroupBox Header="Filtered" Grid.Column="1" BorderBrush="#FF7C007C" Foreground="#FF7C007C">
+        
+        <GroupBox Header="Filtered" Grid.RowSpan="2" Grid.Column="1" BorderBrush="#FF7C007C" Foreground="#FF7C007C">
             <Image x:Name="FilteredImage"/>
         </GroupBox>
+        
         <GroupBox Header="Controls" Grid.Column="2" BorderBrush="#FF7C007C" Foreground="#FF7C007C">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="LoadButton" Grid.Column="0" Content="Load" Width="57" Height="33" Background="#FF7C007C" Foreground="#FFFDC9FD" Click="LoadButton_Click" BorderBrush="#FFFDC9FD"/>
+                <Button x:Name="ResetButton" Grid.Column="1" Content="Reset" Width="57" Height="33" Background="#FF7C007C" Foreground="#FFFDC9FD" Click="ResetButton_Click" BorderBrush="#FFFDC9FD"/>
+                <Button x:Name="SaveButton" Grid.Column="2" Content="Save" Width="57" Height="33" Background="#FF7C007C" Foreground="#FFFDC9FD" Click="SaveButton_Click" BorderBrush="#FFFDC9FD"/>
+            </Grid>
+
+        </GroupBox>
+
+        <GroupBox Header="Filters" Grid.Row="1" Grid.Column="2" BorderBrush="#FF7C007C" Foreground="#FF7C007C">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -29,41 +51,35 @@
                 </Grid.ColumnDefinitions>
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50"/>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
-                    <RowDefinition Height="50"/>
-                    <RowDefinition Height="25"/>
-                    <RowDefinition Height="25"/>
-                    <RowDefinition Height="25"/>
-                    <RowDefinition Height="25"/>
-                    <RowDefinition Height="25"/>
-                    <RowDefinition Height="25"/>
-
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <Button x:Name="LoadButton" Grid.Row="0" Grid.Column="0" Content="Load" Width="57" Height="33" Background="#FF7C007C" Foreground="#FFFDC9FD" Click="LoadButton_Click" BorderBrush="#FFFDC9FD"/>
-                <Button x:Name="SaveButton" Grid.Row="0" Grid.Column="1" Content="Save" Width="57" Height="33" Background="#FF7C007C" Foreground="#FFFDC9FD" Click="SaveButton_Click" BorderBrush="#FFFDC9FD"/>
 
-                <Button x:Name="InversionButton" Grid.ColumnSpan="2" Grid.Row="2" Content="Inversion" Height="20" Click="InversionButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
-                <Button x:Name="BrightnessButton" Grid.ColumnSpan="2" Grid.Row="3" Content="Brightness Correction" Height="20" Click="BrightnessButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
-                <Button x:Name="ContrastButton" Grid.ColumnSpan="2" Grid.Row="4" Content="Contrast Enhancement" Height="20" Click="ContrastButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
-                <Button x:Name="GammaButton" Grid.ColumnSpan="2" Grid.Row="5" Content="Gamma Correction" Click="GammaButton_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+                <Button x:Name="InversionButton" Grid.Column="0" Grid.Row="0" Content="Inversion" Height="20" Click="InversionButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,3" />
+                <Button x:Name="BrightnessButton" Grid.Column="0" Grid.Row="1" Content="Brightness Correction" Height="20" Click="BrightnessButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,3,5,2" />
+                <Button x:Name="ContrastButton" Grid.Column="0" Grid.Row="2" Content="Contrast Enhancement" Height="20" Click="ContrastButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,3" />
+                <Button x:Name="GammaButton" Grid.Column="0" Grid.Row="3" Content="Gamma Correction" Click="GammaButton_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,2" />
 
-    
-                <Button x:Name="Blur" Grid.ColumnSpan="2" Grid.Row="7" Content="Blur" Click="Blur_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
-                <Button x:Name="GaussianBlur" Grid.ColumnSpan="2" Grid.Row="8" Content="Gaussian Blur" Click="GaussianBlur_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
-                <Button x:Name="Sharpen" Grid.ColumnSpan="2" Grid.Row="9" Content="Sharpen" Click="Sharpen_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
-                <Button x:Name="EdgeDetection" Grid.ColumnSpan="2" Grid.Row="10" Content="Edge Detection" Click="EdgeDetection_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
-                <Button x:Name="Emboss" Grid.ColumnSpan="2" Grid.Row="11" Content="Emboss" Click="Emboss_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+
+                <Button x:Name="Blur" Grid.Column="1" Grid.Row="0" Content="Blur" Click="Blur_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+                <Button x:Name="GaussianBlur" Grid.Column="1" Grid.Row="1" Content="Gaussian Blur" Click="GaussianBlur_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+                <Button x:Name="Sharpen" Grid.Column="1" Grid.Row="2" Content="Sharpen" Click="Sharpen_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+                <Button x:Name="EdgeDetection" Grid.Column="1" Grid.Row="3" Content="Edge Detection" Click="EdgeDetection_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+                <Button x:Name="Emboss" Grid.Column="1" Grid.Row="4" Content="Emboss" Click="Emboss_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+
+        
 
 
             </Grid>
 
+   
         </GroupBox>
+
 
     </Grid>
 

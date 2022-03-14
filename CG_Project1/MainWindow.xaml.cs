@@ -74,6 +74,13 @@ namespace CG_Project1
         }
 
 
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (FilteredImage.Source == null) return;
+
+            FilteredImage.Source = ImageViewer.Source;
+        }
+
         public static BitmapSource Invert(BitmapSource source)
         {
             int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7)/8 ;
