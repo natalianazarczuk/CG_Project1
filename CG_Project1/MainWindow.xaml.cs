@@ -1,23 +1,14 @@
 ﻿using Microsoft.Win32;
-using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using LiveCharts;
+using LiveCharts.Wpf;
+using System.Windows.Controls;
+using System.Windows.Input;
+using GalaSoft.MvvmLight.Command;
 
 namespace CG_Project1
 {
@@ -26,6 +17,9 @@ namespace CG_Project1
         public MainWindow()
         {
             InitializeComponent();
+
+            var tvm = new TestViewModel();
+            tvm.RandomizeChart();
         }
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)
@@ -35,9 +29,10 @@ namespace CG_Project1
             dlg.Filter = "Image files (*.jpg)|*.jpg|All Files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
-            if(dlg.ShowDialog() == true) {
+            if (dlg.ShowDialog() == true)
+            {
                 var selectedFileName = dlg.FileName;
-                BitmapImage bitmap = new BitmapImage(new Uri(selectedFileName));;
+                BitmapImage bitmap = new BitmapImage(new Uri(selectedFileName)); ;
                 ImageViewer.Source = bitmap;
             }
 
@@ -46,6 +41,7 @@ namespace CG_Project1
                 FilteredImage.Source = null;
             }
         }
+
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
@@ -56,21 +52,15 @@ namespace CG_Project1
                 Filter = "PNG File (.png)|*.png"
             };
 
+
             if (dlg.ShowDialog() == true)
             {
-                var filename = dlg.FileName;
-
-                var rtb = new RenderTargetBitmap((int)FilteredImage.ActualWidth, (int)FilteredImage.ActualHeight, 96, 96, PixelFormats.Pbgra32);
-                rtb.Render(FilteredImage);
-
                 var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(rtb));
-                using (var stm = File.Create(filename))
-                {
-                    encoder.Save(stm);
-                }
-
+                encoder.Frames.Add(BitmapFrame.Create((BitmapSource)FilteredImage.Source));
+                using (FileStream stream = new FileStream(dlg.FileName, FileMode.Create))
+                    encoder.Save(stream);
             }
+
         }
 
 
@@ -83,18 +73,18 @@ namespace CG_Project1
 
         public static BitmapSource Invert(BitmapSource source)
         {
-            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7)/8 ;
+            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
             int length = stride * source.PixelHeight;
 
             // array that holds pixel data of the source image
-            byte[] pixels = new byte[length];   
+            byte[] pixels = new byte[length];
             source.CopyPixels(pixels, stride, 0);
 
-            for (int i = 0; i < length; i+=4)
+            for (int i = 0; i < length; i += 4)
             {
                 pixels[i] = (byte)(255 - pixels[i]);
-                pixels[i+1] = (byte)(255 - pixels[i+1]);
-                pixels[i+2] = (byte)(255 - pixels[i+2]);
+                pixels[i + 1] = (byte)(255 - pixels[i + 1]);
+                pixels[i + 2] = (byte)(255 - pixels[i + 2]);
             }
 
             return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
@@ -108,12 +98,12 @@ namespace CG_Project1
 
             byte[] pixels = new byte[length];
             source.CopyPixels(pixels, stride, 0);
-            
-            for (int i = 0; i < length; i +=4)
+
+            for (int i = 0; i < length; i += 4)
             {
                 pixels[i] = (byte)((pixels[i] + brightness_factor > 255) ? 255 : ((pixels[i] + brightness_factor < 0) ? 0 : pixels[i] + brightness_factor));
-                pixels[i+1] = (byte)((pixels[i+1] + brightness_factor > 255) ? 255 : ((pixels[i+1] + brightness_factor < 0) ? 0 : pixels[i+1] + brightness_factor));
-                pixels[i+2] = (byte)((pixels[i+2] + brightness_factor > 255) ? 255 : ((pixels[i+2] + brightness_factor < 0) ? 0 : pixels[i+2] + brightness_factor));
+                pixels[i + 1] = (byte)((pixels[i + 1] + brightness_factor > 255) ? 255 : ((pixels[i + 1] + brightness_factor < 0) ? 0 : pixels[i + 1] + brightness_factor));
+                pixels[i + 2] = (byte)((pixels[i + 2] + brightness_factor > 255) ? 255 : ((pixels[i + 2] + brightness_factor < 0) ? 0 : pixels[i + 2] + brightness_factor));
 
             }
 
@@ -134,8 +124,8 @@ namespace CG_Project1
             for (int i = 0; i < length; i += 4)
             {
                 pixels[i] = (byte)((factor * (pixels[i] - 128) + 128 > 255) ? 255 : ((factor * (pixels[i] - 128) + 128 < 0) ? 0 : factor * (pixels[i] - 128) + 128));
-                pixels[i+1] = (byte)((factor * (pixels[i+1] - 128) + 128 > 255) ? 255 : ((factor * (pixels[i+1] - 128) + 128 < 0) ? 0 : factor * (pixels[i+1] - 128) + 128));
-                pixels[i+2] = (byte)((factor * (pixels[i+2] - 128) + 128 > 255) ? 255 : ((factor * (pixels[i+2] - 128) + 128 < 0) ? 0 : factor * (pixels[i+2] - 128) + 128));
+                pixels[i + 1] = (byte)((factor * (pixels[i + 1] - 128) + 128 > 255) ? 255 : ((factor * (pixels[i + 1] - 128) + 128 < 0) ? 0 : factor * (pixels[i + 1] - 128) + 128));
+                pixels[i + 2] = (byte)((factor * (pixels[i + 2] - 128) + 128 > 255) ? 255 : ((factor * (pixels[i + 2] - 128) + 128 < 0) ? 0 : factor * (pixels[i + 2] - 128) + 128));
             }
 
             return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
@@ -161,7 +151,7 @@ namespace CG_Project1
 
         private void InversionButton_Click(object sender, RoutedEventArgs e)
         {
-            if(FilteredImage.Source == null)
+            if (FilteredImage.Source == null)
             {
                 FilteredImage.Source = ImageViewer.Source;
             }
@@ -256,6 +246,39 @@ namespace CG_Project1
 
             var emboss_filter = new EmbossFilter();
             FilteredImage.Source = ((BitmapSource)FilteredImage.Source).ConvolutionFilter(emboss_filter);
+        }
+
+    }
+
+    public class TestViewModel
+    {
+        public SeriesCollection ChartData { get; }
+        private readonly ChartValues<double> _ys;
+
+        public ICommand RandomizeChartCommand { get; }
+        private static Random _random;
+
+        public TestViewModel()
+        {
+            RandomizeChartCommand = new RelayCommand(RandomizeChart);
+            _random = new Random();
+
+            _ys = new ChartValues<double>();
+
+            ChartData = new SeriesCollection()
+        {
+            new LineSeries() {  Values = _ys }
+        };
+        }
+
+        public void RandomizeChart()
+        {
+            _ys.Clear();
+
+            for (int i = 0; i < 100; ++i)
+            {
+                _ys.Add(_random.NextDouble() * 100);
+            }
         }
 
     }
