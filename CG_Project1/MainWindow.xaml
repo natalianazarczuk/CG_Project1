@@ -64,6 +64,7 @@
                 <Button x:Name="BrightnessButton" Grid.Column="0" Grid.Row="1" Content="Brightness Correction" Height="20" Click="BrightnessButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,3,5,2" />
                 <Button x:Name="ContrastButton" Grid.Column="0" Grid.Row="2" Content="Contrast Enhancement" Height="20" Click="ContrastButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,3" />
                 <Button x:Name="GammaButton" Grid.Column="0" Grid.Row="3" Content="Gamma Correction" Click="GammaButton_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,2" />
+                <Button x:Name="Matrix" Grid.Column="0" Grid.Row="4" Content="Matrix" Click="Matrix_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
 
 
                 <Button x:Name="Blur" Grid.Column="1" Grid.Row="0" Content="Blur" Click="Blur_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
@@ -72,7 +73,7 @@
                 <Button x:Name="EdgeDetection" Grid.Column="1" Grid.Row="3" Content="Edge Detection" Click="EdgeDetection_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
                 <Button x:Name="Emboss" Grid.Column="1" Grid.Row="4" Content="Emboss" Click="Emboss_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
 
-                <lvc:CartesianChart x:Name="Chart" Grid.Row="5" Grid.ColumnSpan="2" Series="{Binding ChartData}" LegendLocation="None"  >
+                <lvc:CartesianChart x:Name="Chart" Grid.Row="5" Grid.ColumnSpan="2" Series="{Binding MySeries}" LegendLocation="None">
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Output" MinValue="0" MaxValue="255">
                             <lvc:Axis.Separator>
@@ -87,6 +88,7 @@
                             </lvc:Axis.Separator>
                         </lvc:Axis>
                     </lvc:CartesianChart.AxisX>
+                    
                 </lvc:CartesianChart>
 
             </Grid>

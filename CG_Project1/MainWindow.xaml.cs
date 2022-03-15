@@ -2,25 +2,44 @@
 using System;
 using System.IO;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using LiveCharts;
 using LiveCharts.Wpf;
 using System.Windows.Controls;
 using System.Windows.Input;
 using GalaSoft.MvvmLight.Command;
+using LiveCharts.Configurations;
+using System.ComponentModel;
+
 
 namespace CG_Project1
 {
+
     public partial class MainWindow : Window
     {
+        public SeriesCollection MySeries { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
-
-            var tvm = new TestViewModel();
-            tvm.RandomizeChart();
+            PlotGraph();
         }
+
+
+        private void PlotGraph()
+        {
+            MySeries = new SeriesCollection
+            {
+                new LineSeries
+                {
+                    Values = new ChartValues<double> { 0, 50, 100, 150 , 200, 255 }
+                }
+            };
+
+            DataContext = this;
+        }
+
+
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)
         {
@@ -60,7 +79,6 @@ namespace CG_Project1
                 using (FileStream stream = new FileStream(dlg.FileName, FileMode.Create))
                     encoder.Save(stream);
             }
-
         }
 
 
@@ -110,6 +128,42 @@ namespace CG_Project1
             return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
         }
 
+        public static BitmapSource MatrixMult(BitmapSource source, double[,] filterMatrix)
+        {
+            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
+            int length = stride * source.PixelHeight;
+
+            byte[] pixels = new byte[length];
+            source.CopyPixels(pixels, stride, 0);
+
+            double temp;
+            double[] new_pixels = new double[3];
+
+
+            for (int i = 0; i < length; i += 4)
+            {
+                var new_vector = new double[] { pixels[i], pixels[i + 1], pixels[i + 2] };
+
+                for (int x = 0; x < 3; x++)
+                {
+                    temp = 0;
+                    for (int k = 0; k < 3; k++)
+                    {
+                        temp += filterMatrix[x, k] * new_vector[k];
+                    }
+                    new_pixels[x] = temp;
+                }
+
+
+                pixels[i] = (byte)(new_pixels[0]);
+                pixels[i + 1] = (byte)(new_pixels[1]);
+                pixels[i + 2] = (byte)(new_pixels[2]);
+
+            }
+
+            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
+        }
+
 
         public static BitmapSource Contrast(BitmapSource source, int contrast)
         {
@@ -148,6 +202,8 @@ namespace CG_Project1
 
             return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
         }
+
+
 
         private void InversionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -248,38 +304,16 @@ namespace CG_Project1
             FilteredImage.Source = ((BitmapSource)FilteredImage.Source).ConvolutionFilter(emboss_filter);
         }
 
-    }
-
-    public class TestViewModel
-    {
-        public SeriesCollection ChartData { get; }
-        private readonly ChartValues<double> _ys;
-
-        public ICommand RandomizeChartCommand { get; }
-        private static Random _random;
-
-        public TestViewModel()
+        private void Matrix_Click(object sender, RoutedEventArgs e)
         {
-            RandomizeChartCommand = new RelayCommand(RandomizeChart);
-            _random = new Random();
-
-            _ys = new ChartValues<double>();
-
-            ChartData = new SeriesCollection()
-        {
-            new LineSeries() {  Values = _ys }
-        };
-        }
-
-        public void RandomizeChart()
-        {
-            _ys.Clear();
-
-            for (int i = 0; i < 100; ++i)
+            if (FilteredImage.Source == null)
             {
-                _ys.Add(_random.NextDouble() * 100);
+                FilteredImage.Source = ImageViewer.Source;
             }
-        }
 
+            FilteredImage.Source = MatrixMult((BitmapSource)FilteredImage.Source, new double[,] { { 0, 0, 1, }, { 0, 1, 0, }, { 1, 0, 0, }, });
+
+        }
     }
+
 }
