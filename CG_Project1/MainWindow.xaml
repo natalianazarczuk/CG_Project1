@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
         Title="CG_Project1" Height="500" Width="950" >
 
@@ -56,7 +57,13 @@
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
-                    <RowDefinition/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+
+                    <RowDefinition />
                 </Grid.RowDefinitions>
 
 
@@ -64,7 +71,7 @@
                 <Button x:Name="BrightnessButton" Grid.Column="0" Grid.Row="1" Content="Brightness Correction" Height="20" Click="BrightnessButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,3,5,2" />
                 <Button x:Name="ContrastButton" Grid.Column="0" Grid.Row="2" Content="Contrast Enhancement" Height="20" Click="ContrastButton_Click" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,3" />
                 <Button x:Name="GammaButton" Grid.Column="0" Grid.Row="3" Content="Gamma Correction" Click="GammaButton_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,2" />
-                <Button x:Name="Matrix" Grid.Column="0" Grid.Row="4" Content="Matrix" Click="Matrix_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+                <Button x:Name="Matrix" Grid.Column="0" Grid.Row="4" Content="Matrix" Click="Matrix_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,2" />
 
 
                 <Button x:Name="Blur" Grid.Column="1" Grid.Row="0" Content="Blur" Click="Blur_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
@@ -72,29 +79,28 @@
                 <Button x:Name="Sharpen" Grid.Column="1" Grid.Row="2" Content="Sharpen" Click="Sharpen_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
                 <Button x:Name="EdgeDetection" Grid.Column="1" Grid.Row="3" Content="Edge Detection" Click="EdgeDetection_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
                 <Button x:Name="Emboss" Grid.Column="1" Grid.Row="4" Content="Emboss" Click="Emboss_Click" Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" />
+                <Button x:Name="GreySc" Grid.Column="0" Grid.Row="5" Content="Grey Scale" Click="GreySc_OnClick"  Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,2" />
 
-                <lvc:CartesianChart x:Name="Chart" Grid.Row="5" Grid.ColumnSpan="2" Series="{Binding MySeries}" LegendLocation="None">
-                    <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Output" MinValue="0" MaxValue="255">
-                            <lvc:Axis.Separator>
-                                <lvc:Separator Step="50" />
-                            </lvc:Axis.Separator>
-                        </lvc:Axis>
-                    </lvc:CartesianChart.AxisY>
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Input" MinValue="0" MaxValue="255">
-                            <lvc:Axis.Separator>
-                                <lvc:Separator Step="50" />
-                            </lvc:Axis.Separator>
-                        </lvc:Axis>
-                    </lvc:CartesianChart.AxisX>
-                    
-                </lvc:CartesianChart>
+
+                <ComboBox x:Name="ChooseKernel" Text="Error Diffusion" Grid.Column="0" Grid.Row="7" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Background="#FFFDC9FD" Margin="0,2,5,2" >
+                    <system:String>Floyd-Steinberg</system:String>
+                    <system:String>Burkes</system:String>
+                    <system:String>Stucky</system:String>
+                    <system:String>Sierra</system:String>
+                    <system:String>Atkinson</system:String>
+                </ComboBox>
+
+                <Button x:Name="ApplyErr" Grid.Column="1" Grid.Row="7" Content="Error Diffusion" Click="ApplyErr_OnClick"  Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,2" />
+
+                <Label Grid.Column="0" Grid.Row="9" Content="Number of colors:"  Foreground="#FF7C007C" />
+                <TextBox x:Name="ColorsNumber" Grid.Column="0" Grid.Row="9" Margin="113,0,5,0" Height="21" BorderBrush="#FF7C007C" />
+                <Button x:Name="ApplyPopul" Grid.Column="1" Grid.Row="9" Click="ApplyPopul_OnClick"  Content="Popularity"  Height="21" Background="#FFFDC9FD" BorderBrush="#FF7C007C" Foreground="#FF7C007C" Margin="0,2,5,2" />
+
 
             </Grid>
-
-   
         </GroupBox>
+
+     
 
 
     </Grid>
