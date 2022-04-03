@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace CG_Project1
 {
-    public class Dithering
+    public class ErrorDiffusion
     {
         public static byte[,,] Make(byte[,,] original, int factor, bool isGrayScale, string kernel)
         {
@@ -221,7 +221,6 @@ namespace CG_Project1
 
        private static byte[,,] ConvertToGrayScale(byte[,,] imgArr)
        {
-           // R' = G' = B'  = 0.299R + 0.587G + 0.114B
            if (imgArr != null)
            {
                byte[,,] gray = new byte[imgArr.GetLength(0), imgArr.GetLength(1), 3];

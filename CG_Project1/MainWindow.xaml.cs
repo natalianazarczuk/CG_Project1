@@ -15,9 +15,8 @@ namespace CG_Project1
 
     public partial class MainWindow : Window
     {
-        static bool isGrayScale = false;
-      
-
+        private static bool isGrayScale;
+        private static Popularity popularity = new();
 
         public MainWindow()
         {
@@ -44,6 +43,8 @@ namespace CG_Project1
             {
                 FilteredImage.Source = null;
             }
+
+            isGrayScale = false;
         }
 
 
@@ -72,6 +73,8 @@ namespace CG_Project1
             if (FilteredImage.Source == null) return;
 
             FilteredImage.Source = ImageViewer.Source;
+            isGrayScale = false;
+
         }
 
 
@@ -251,8 +254,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = Brighten((BitmapSource) FilteredImage.Source, 10);
-
+            FilteredImage.Source = Brighten((BitmapSource)FilteredImage.Source, 10);
         }
 
         private void ContrastButton_Click(object sender, RoutedEventArgs e)
@@ -356,21 +358,23 @@ namespace CG_Project1
         }
 
 
-        public static BitmapSource ErrorDiff(BitmapSource source, string kernel)
+        private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
         {
-            using var outStream = new MemoryStream();
-            var enc = new BmpBitmapEncoder();
-            enc.Frames.Add(BitmapFrame.Create((BitmapImage)source));
+            using MemoryStream outStream = new MemoryStream();
+            BitmapEncoder enc = new BmpBitmapEncoder();
+            enc.Frames.Add(BitmapFrame.Create(bitmapImage));
             enc.Save(outStream);
             var bitmap = new Bitmap(outStream);
 
+            return new Bitmap(bitmap);
+        }
 
-            var ditheredArray = Dithering.Make(Dithering.GetImageArray(bitmap), 2, isGrayScale, kernel);
-
-
+        public static BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
+        {
             using var memory = new MemoryStream();
-            Dithering.GetBitmapFromArray(ditheredArray).Save(memory, ImageFormat.Png);
+            bitmap.Save(memory, ImageFormat.Png);
             memory.Position = 0;
+
             var bitmapImage = new BitmapImage();
             bitmapImage.BeginInit();
             bitmapImage.StreamSource = memory;
@@ -379,9 +383,7 @@ namespace CG_Project1
             bitmapImage.Freeze();
 
             return bitmapImage;
-
         }
-
 
         private void ApplyErr_OnClick(object sender, RoutedEventArgs e)
         {
@@ -390,14 +392,21 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = ErrorDiff((BitmapSource)FilteredImage.Source, ChooseKernel.SelectedItem.ToString());
-
+            Bitmap bitmap = BitmapImage2Bitmap((BitmapImage)FilteredImage.Source);
+            var array = ErrorDiffusion.Make(ErrorDiffusion.GetImageArray(bitmap), 2, isGrayScale, ChooseKernel.SelectedItem.ToString());
+            FilteredImage.Source = Bitmap2BitmapImage(ErrorDiffusion.GetBitmapFromArray(array));
         }
 
 
         private void ApplyPopul_OnClick(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            if (FilteredImage.Source == null)
+            {
+                FilteredImage.Source = ImageViewer.Source;
+            }
+
+            var bitmap = BitmapImage2Bitmap((BitmapImage)FilteredImage.Source);
+            FilteredImage.Source = Bitmap2BitmapImage(popularity.PopularityQuantizationApply(bitmap, int.Parse(ColorsNumber.Text)));
         }
 
     }
