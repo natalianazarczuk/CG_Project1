@@ -211,30 +211,59 @@ namespace CG_Project1
         }
 
 
-        public static BitmapSource GreyScale(BitmapSource source)
+        //public static BitmapSource GreyScale(BitmapSource source)
+        //{
+        //    int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
+        //    int length = stride * source.PixelHeight;
+
+        //    byte[] pixels = new byte[length];
+        //    source.CopyPixels(pixels, stride, 0);
+
+        //    for (int i = 0; i < length; i += 4)
+        //    {
+        //        int red = pixels[i];
+        //        int green = pixels[i + 1];
+        //        int blue = pixels[i + 1];
+
+        //        pixels[i] = pixels[i + 1] = pixels[i + 2] = (byte) ((red + green + blue) / 3);
+
+        //    }
+
+        //    isGrayScale = true;
+
+        //    return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
+        //        null, pixels, stride);
+        //}
+
+        public static unsafe BitmapSource ToGrayScale(BitmapSource source)
         {
-            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
-            int length = stride * source.PixelHeight;
 
-            byte[] pixels = new byte[length];
-            source.CopyPixels(pixels, stride, 0);
+            const int PIXEL_SIZE = 4;
+            var bitmap = new WriteableBitmap(source);
+            
 
-            for (int i = 0; i < length; i += 4)
+            bitmap.Lock();
+            var backBuffer = (byte*)bitmap.BackBuffer.ToPointer();
+
+            for (int y = 0; y < source.PixelHeight; y++)
             {
-                int red = pixels[i];
-                int green = pixels[i + 1];
-                int blue = pixels[i + 1];
+                var row = backBuffer + (y * bitmap.BackBufferStride);
 
-                pixels[i] = pixels[i + 1] = pixels[i + 2] = (byte) ((red + green + blue) / 3);
+                for (int x = 0; x < source.PixelWidth; x++)
+                {
+                    var grayScale = (byte) (((row[x * PIXEL_SIZE + 1]) + (row[x * PIXEL_SIZE + 2]) +
+                                             (row[x * PIXEL_SIZE + 3])) / 3);
 
+                    for (int i = 0; i < PIXEL_SIZE; i++)
+                        row[x * PIXEL_SIZE + i] = grayScale;
+                }
             }
 
-            isGrayScale = true;
+            bitmap.AddDirtyRect(new Int32Rect(0, 0, source.PixelWidth, source.PixelHeight));
+            bitmap.Unlock();
 
-            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
-                null, pixels, stride);
+            return bitmap;
         }
-
 
         private void InversionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -354,7 +383,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = GreyScale((BitmapSource) FilteredImage.Source);
+            FilteredImage.Source = ToGrayScale((BitmapSource) FilteredImage.Source);
         }
 
 
@@ -385,6 +414,18 @@ namespace CG_Project1
             return bitmapImage;
         }
 
+        private Bitmap BitmapFromWriteableBitmap(WriteableBitmap writeBmp)
+        {
+            Bitmap bmp;
+            using MemoryStream outStream = new MemoryStream();
+            BitmapEncoder enc = new BmpBitmapEncoder();
+            enc.Frames.Add(BitmapFrame.Create(writeBmp));
+            enc.Save(outStream);
+            bmp = new Bitmap(outStream);
+
+            return bmp;
+        }
+
         private void ApplyErr_OnClick(object sender, RoutedEventArgs e)
         {
             if (FilteredImage.Source == null)
@@ -392,7 +433,18 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            Bitmap bitmap = BitmapImage2Bitmap((BitmapImage)FilteredImage.Source);
+            Bitmap bitmap;
+
+            if (FilteredImage.Source is WriteableBitmap)
+            {
+                 bitmap = BitmapFromWriteableBitmap((WriteableBitmap)FilteredImage.Source);
+
+            }
+            else
+            {
+                bitmap = BitmapImage2Bitmap((BitmapImage)FilteredImage.Source);
+            }
+
             var array = ErrorDiffusion.Make(ErrorDiffusion.GetImageArray(bitmap), 2, isGrayScale, ChooseKernel.SelectedItem.ToString());
             FilteredImage.Source = Bitmap2BitmapImage(ErrorDiffusion.GetBitmapFromArray(array));
         }
