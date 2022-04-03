@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
+using Point = System.Drawing.Point;
 
 namespace CG_Project1
 {
@@ -106,7 +102,7 @@ namespace CG_Project1
 
     public static class EndBitmap
     {
-        public static BitmapSource ConvolutionFilter<T>(this BitmapSource source, T filter) where T : ConvolutionFilterBase
+        public static Bitmap ConvolutionFilter<T>(this BitmapSource source, T filter) where T : ConvolutionFilterBase
         {
             int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
             int length = stride * source.PixelHeight;
@@ -149,7 +145,13 @@ namespace CG_Project1
                 }
             }
 
-            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, result_pixels, stride);
+            var src = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, result_pixels, stride);
+
+            Bitmap bmp = new Bitmap(src.PixelWidth, src.PixelHeight, PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+            src.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
         }
 
     }

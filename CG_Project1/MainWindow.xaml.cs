@@ -1,14 +1,11 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Windows.Media;
-using DevExpress.Data;
-
+using Point = System.Drawing.Point;
 
 namespace CG_Project1
 {
@@ -16,7 +13,6 @@ namespace CG_Project1
     public partial class MainWindow : Window
     {
         private static bool isGrayScale;
-        private static Popularity popularity = new();
 
         public MainWindow()
         {
@@ -26,10 +22,12 @@ namespace CG_Project1
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.InitialDirectory = "c:\\";
-            dlg.Filter = "Image files (*.jpg)|*.jpg|All Files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
+            OpenFileDialog dlg = new()
+            {
+                InitialDirectory = "c:\\",
+                Filter = "Image files (*.jpg)|*.jpg|All Files (*.*)|*.*",
+                RestoreDirectory = true
+            };
 
             if (dlg.ShowDialog() == true)
             {
@@ -50,7 +48,7 @@ namespace CG_Project1
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog
+            SaveFileDialog dlg = new()
             {
                 FileName = "Image",
                 DefaultExt = ".png",
@@ -60,46 +58,53 @@ namespace CG_Project1
 
             if (dlg.ShowDialog() == true)
             {
-                var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create((BitmapSource) FilteredImage.Source));
-                using (FileStream stream = new FileStream(dlg.FileName, FileMode.Create))
-                    encoder.Save(stream);
+                PngBitmapEncoder encoder = new();
+                encoder.Frames.Add(BitmapFrame.Create((BitmapSource)FilteredImage.Source));
+                using FileStream stream = new (dlg.FileName, FileMode.Create);
+                encoder.Save(stream);
             }
         }
 
 
         private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
-            if (FilteredImage.Source == null) return;
+            if (FilteredImage.Source == null)
+            {
+                return;
+            }
 
             FilteredImage.Source = ImageViewer.Source;
             isGrayScale = false;
-
         }
 
 
-        public static BitmapSource Invert(BitmapSource source)
+        public static Bitmap Invert(BitmapSource source)
         {
             int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
             int length = stride * source.PixelHeight;
 
-            // array that holds pixel data of the source image
-            byte[] pixels = new byte[length];
+            var pixels = new byte[length];
             source.CopyPixels(pixels, stride, 0);
 
             for (int i = 0; i < length; i += 4)
             {
-                pixels[i] = (byte) (255 - pixels[i]);
-                pixels[i + 1] = (byte) (255 - pixels[i + 1]);
-                pixels[i + 2] = (byte) (255 - pixels[i + 2]);
+                pixels[i] = (byte)(255 - pixels[i]);
+                pixels[i + 1] = (byte)(255 - pixels[i + 1]);
+                pixels[i + 2] = (byte)(255 - pixels[i + 2]);
             }
 
-            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
-                null, pixels, stride);
+            var src = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
+
+
+            Bitmap bmp = new Bitmap( src.PixelWidth, src.PixelHeight, PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits( new Rectangle(Point.Empty, bmp.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+            src.CopyPixels( Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
         }
 
 
-        public static BitmapSource Brighten(BitmapSource source, int brightness_factor)
+        public static Bitmap Brighten(BitmapSource source, int brightness_factor)
         {
             int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
             int length = stride * source.PixelHeight;
@@ -109,23 +114,30 @@ namespace CG_Project1
 
             for (int i = 0; i < length; i += 4)
             {
-                pixels[i] = (byte) ((pixels[i] + brightness_factor > 255)
+                pixels[i] = (byte)((pixels[i] + brightness_factor > 255)
                     ? 255
                     : ((pixels[i] + brightness_factor < 0) ? 0 : pixels[i] + brightness_factor));
-                pixels[i + 1] = (byte) ((pixels[i + 1] + brightness_factor > 255)
+                pixels[i + 1] = (byte)((pixels[i + 1] + brightness_factor > 255)
                     ? 255
                     : ((pixels[i + 1] + brightness_factor < 0) ? 0 : pixels[i + 1] + brightness_factor));
-                pixels[i + 2] = (byte) ((pixels[i + 2] + brightness_factor > 255)
+                pixels[i + 2] = (byte)((pixels[i + 2] + brightness_factor > 255)
                     ? 255
                     : ((pixels[i + 2] + brightness_factor < 0) ? 0 : pixels[i + 2] + brightness_factor));
 
             }
 
-            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
+            var src = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
                 null, pixels, stride);
+
+
+            Bitmap bmp = new Bitmap(src.PixelWidth, src.PixelHeight, PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+            src.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
         }
 
-        public static BitmapSource MatrixMult(BitmapSource source, double[,] filterMatrix)
+        public static Bitmap MatrixMult(BitmapSource source, double[,] filterMatrix)
         {
             int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
             int length = stride * source.PixelHeight;
@@ -139,7 +151,7 @@ namespace CG_Project1
 
             for (int i = 0; i < length; i += 4)
             {
-                var new_vector = new double[] {pixels[i], pixels[i + 1], pixels[i + 2]};
+                byte[] new_vector = new[] { pixels[i], pixels[i + 1], pixels[i + 2] };
 
                 for (int x = 0; x < 3; x++)
                 {
@@ -153,18 +165,25 @@ namespace CG_Project1
                 }
 
 
-                pixels[i] = (byte) (new_pixels[0]);
-                pixels[i + 1] = (byte) (new_pixels[1]);
-                pixels[i + 2] = (byte) (new_pixels[2]);
+                pixels[i] = (byte)new_pixels[0];
+                pixels[i + 1] = (byte)new_pixels[1];
+                pixels[i + 2] = (byte)new_pixels[2];
 
             }
 
-            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
+            var src = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
                 null, pixels, stride);
+
+            Bitmap bmp = new Bitmap(src.PixelWidth, src.PixelHeight, PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+            src.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
+
         }
 
 
-        public static BitmapSource Contrast(BitmapSource source, int contrast)
+        public static Bitmap Contrast(BitmapSource source, int contrast)
         {
             int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
             int length = stride * source.PixelHeight;
@@ -172,26 +191,33 @@ namespace CG_Project1
             byte[] pixels = new byte[length];
             source.CopyPixels(pixels, stride, 0);
 
-            int factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+            int factor = 259 * (contrast + 255) / (255 * (259 - contrast));
 
             for (int i = 0; i < length; i += 4)
             {
-                pixels[i] = (byte) ((factor * (pixels[i] - 128) + 128 > 255)
+                pixels[i] = (byte)((factor * (pixels[i] - 128) + 128 > 255)
                     ? 255
                     : ((factor * (pixels[i] - 128) + 128 < 0) ? 0 : factor * (pixels[i] - 128) + 128));
-                pixels[i + 1] = (byte) ((factor * (pixels[i + 1] - 128) + 128 > 255)
+                pixels[i + 1] = (byte)((factor * (pixels[i + 1] - 128) + 128 > 255)
                     ? 255
                     : ((factor * (pixels[i + 1] - 128) + 128 < 0) ? 0 : factor * (pixels[i + 1] - 128) + 128));
-                pixels[i + 2] = (byte) ((factor * (pixels[i + 2] - 128) + 128 > 255)
+                pixels[i + 2] = (byte)((factor * (pixels[i + 2] - 128) + 128 > 255)
                     ? 255
                     : ((factor * (pixels[i + 2] - 128) + 128 < 0) ? 0 : factor * (pixels[i + 2] - 128) + 128));
             }
 
-            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
+            var src = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
                 null, pixels, stride);
+
+
+            Bitmap bmp = new Bitmap(src.PixelWidth, src.PixelHeight, PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+            src.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
         }
 
-        public static BitmapSource Gamma(BitmapSource source, double gamma)
+        public static Bitmap Gamma(BitmapSource source, double gamma)
         {
             int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
             int length = stride * source.PixelHeight;
@@ -201,69 +227,53 @@ namespace CG_Project1
 
             for (int i = 0; i < length; i += 4)
             {
-                pixels[i] = (byte) (Math.Pow(pixels[i] / 255.0f, 1 / gamma) * 255);
-                pixels[i + 1] = (byte) (Math.Pow(pixels[i + 1] / 255.0f, 1 / gamma) * 255);
-                pixels[i + 2] = (byte) (Math.Pow(pixels[i + 2] / 255.0f, 1 / gamma) * 255);
+                pixels[i] = (byte)(Math.Pow(pixels[i] / 255.0f, 1 / gamma) * 255);
+                pixels[i + 1] = (byte)(Math.Pow(pixels[i + 1] / 255.0f, 1 / gamma) * 255);
+                pixels[i + 2] = (byte)(Math.Pow(pixels[i + 2] / 255.0f, 1 / gamma) * 255);
             }
 
-            return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
+            var src = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
                 null, pixels, stride);
+
+
+            Bitmap bmp = new Bitmap(src.PixelWidth, src.PixelHeight, PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+            src.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
         }
 
 
-        //public static BitmapSource GreyScale(BitmapSource source)
-        //{
-        //    int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
-        //    int length = stride * source.PixelHeight;
-
-        //    byte[] pixels = new byte[length];
-        //    source.CopyPixels(pixels, stride, 0);
-
-        //    for (int i = 0; i < length; i += 4)
-        //    {
-        //        int red = pixels[i];
-        //        int green = pixels[i + 1];
-        //        int blue = pixels[i + 1];
-
-        //        pixels[i] = pixels[i + 1] = pixels[i + 2] = (byte) ((red + green + blue) / 3);
-
-        //    }
-
-        //    isGrayScale = true;
-
-        //    return BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
-        //        null, pixels, stride);
-        //}
-
-        public static unsafe BitmapSource ToGrayScale(BitmapSource source)
+        public static Bitmap GreyScale(BitmapSource source)
         {
+            int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
+            int length = stride * source.PixelHeight;
 
-            const int PIXEL_SIZE = 4;
-            var bitmap = new WriteableBitmap(source);
-            
+            byte[] pixels = new byte[length];
+            source.CopyPixels(pixels, stride, 0);
 
-            bitmap.Lock();
-            var backBuffer = (byte*)bitmap.BackBuffer.ToPointer();
-
-            for (int y = 0; y < source.PixelHeight; y++)
+            for (int i = 0; i < length; i += 4)
             {
-                var row = backBuffer + (y * bitmap.BackBufferStride);
+                int red = pixels[i];
+                int green = pixels[i + 1];
+                int blue = pixels[i + 1];
 
-                for (int x = 0; x < source.PixelWidth; x++)
-                {
-                    var grayScale = (byte) (((row[x * PIXEL_SIZE + 1]) + (row[x * PIXEL_SIZE + 2]) +
-                                             (row[x * PIXEL_SIZE + 3])) / 3);
+                pixels[i] = pixels[i + 1] = pixels[i + 2] = (byte)((red + green + blue) / 3);
 
-                    for (int i = 0; i < PIXEL_SIZE; i++)
-                        row[x * PIXEL_SIZE + i] = grayScale;
-                }
             }
 
-            bitmap.AddDirtyRect(new Int32Rect(0, 0, source.PixelWidth, source.PixelHeight));
-            bitmap.Unlock();
+            isGrayScale = true;
 
-            return bitmap;
+            var src = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format,
+                null, pixels, stride);
+
+            Bitmap bmp = new Bitmap(src.PixelWidth, src.PixelHeight, PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+            src.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
         }
+
 
         private void InversionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -272,8 +282,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = Invert((BitmapSource) FilteredImage.Source);
-
+            FilteredImage.Source = Bitmap2BitmapImage(Invert((BitmapSource)FilteredImage.Source));
         }
 
         private void BrightnessButton_Click(object sender, RoutedEventArgs e)
@@ -283,7 +292,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = Brighten((BitmapSource)FilteredImage.Source, 10);
+            FilteredImage.Source = Bitmap2BitmapImage(Brighten((BitmapSource)FilteredImage.Source, 10));
         }
 
         private void ContrastButton_Click(object sender, RoutedEventArgs e)
@@ -293,7 +302,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = Contrast((BitmapSource) FilteredImage.Source, 128);
+            FilteredImage.Source = Bitmap2BitmapImage(Contrast((BitmapSource)FilteredImage.Source, 128));
 
         }
 
@@ -304,7 +313,7 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = Gamma((BitmapSource) FilteredImage.Source, 20);
+            FilteredImage.Source = Bitmap2BitmapImage(Gamma((BitmapSource)FilteredImage.Source, 20));
         }
 
         private void Blur_Click(object sender, RoutedEventArgs e)
@@ -315,7 +324,7 @@ namespace CG_Project1
             }
 
             var blur_filter = new BlurFilter();
-            FilteredImage.Source = ((BitmapSource) FilteredImage.Source).ConvolutionFilter(blur_filter);
+            FilteredImage.Source = Bitmap2BitmapImage(((BitmapSource)FilteredImage.Source).ConvolutionFilter(blur_filter));
         }
 
         private void GaussianBlur_Click(object sender, RoutedEventArgs e)
@@ -326,7 +335,7 @@ namespace CG_Project1
             }
 
             var gauss_filter = new GaussianBlurFilter();
-            FilteredImage.Source = ((BitmapSource) FilteredImage.Source).ConvolutionFilter(gauss_filter);
+            FilteredImage.Source = Bitmap2BitmapImage(((BitmapSource)FilteredImage.Source).ConvolutionFilter(gauss_filter));
         }
 
         private void Sharpen_Click(object sender, RoutedEventArgs e)
@@ -337,7 +346,7 @@ namespace CG_Project1
             }
 
             var sharp_filter = new SharpenFilter();
-            FilteredImage.Source = ((BitmapSource) FilteredImage.Source).ConvolutionFilter(sharp_filter);
+            FilteredImage.Source = Bitmap2BitmapImage(((BitmapSource)FilteredImage.Source).ConvolutionFilter(sharp_filter));
 
         }
 
@@ -349,7 +358,7 @@ namespace CG_Project1
             }
 
             var edge_filter = new EdgeDetectionFilter();
-            FilteredImage.Source = ((BitmapSource) FilteredImage.Source).ConvolutionFilter(edge_filter);
+            FilteredImage.Source = Bitmap2BitmapImage(((BitmapSource)FilteredImage.Source).ConvolutionFilter(edge_filter));
         }
 
 
@@ -361,7 +370,7 @@ namespace CG_Project1
             }
 
             var emboss_filter = new EmbossFilter();
-            FilteredImage.Source = ((BitmapSource) FilteredImage.Source).ConvolutionFilter(emboss_filter);
+            FilteredImage.Source = Bitmap2BitmapImage(((BitmapSource)FilteredImage.Source).ConvolutionFilter(emboss_filter));
         }
 
         private void Matrix_Click(object sender, RoutedEventArgs e)
@@ -371,8 +380,8 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = MatrixMult((BitmapSource) FilteredImage.Source,
-                new double[,] {{0, 0, 1,}, {0, 1, 0,}, {1, 0, 0,},});
+            FilteredImage.Source = Bitmap2BitmapImage(MatrixMult((BitmapSource)FilteredImage.Source,
+                new double[,] { { 0, 0, 1, }, { 0, 1, 0, }, { 1, 0, 0, }, }));
 
         }
 
@@ -383,24 +392,23 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            FilteredImage.Source = ToGrayScale((BitmapSource) FilteredImage.Source);
+            FilteredImage.Source = Bitmap2BitmapImage(GreyScale((BitmapSource)FilteredImage.Source));
         }
 
 
-        private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
+        private static Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
         {
             using MemoryStream outStream = new MemoryStream();
             BitmapEncoder enc = new BmpBitmapEncoder();
             enc.Frames.Add(BitmapFrame.Create(bitmapImage));
             enc.Save(outStream);
-            var bitmap = new Bitmap(outStream);
 
-            return new Bitmap(bitmap);
+            return new Bitmap(outStream);
         }
 
         public static BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
         {
-            using var memory = new MemoryStream();
+            using MemoryStream memory = new MemoryStream();
             bitmap.Save(memory, ImageFormat.Png);
             memory.Position = 0;
 
@@ -414,17 +422,6 @@ namespace CG_Project1
             return bitmapImage;
         }
 
-        private Bitmap BitmapFromWriteableBitmap(WriteableBitmap writeBmp)
-        {
-            Bitmap bmp;
-            using MemoryStream outStream = new MemoryStream();
-            BitmapEncoder enc = new BmpBitmapEncoder();
-            enc.Frames.Add(BitmapFrame.Create(writeBmp));
-            enc.Save(outStream);
-            bmp = new Bitmap(outStream);
-
-            return bmp;
-        }
 
         private void ApplyErr_OnClick(object sender, RoutedEventArgs e)
         {
@@ -433,19 +430,8 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            Bitmap bitmap;
-
-            if (FilteredImage.Source is WriteableBitmap)
-            {
-                 bitmap = BitmapFromWriteableBitmap((WriteableBitmap)FilteredImage.Source);
-
-            }
-            else
-            {
-                bitmap = BitmapImage2Bitmap((BitmapImage)FilteredImage.Source);
-            }
-
-            var array = ErrorDiffusion.Make(ErrorDiffusion.GetImageArray(bitmap), 2, isGrayScale, ChooseKernel.SelectedItem.ToString());
+            Bitmap bitmap = BitmapImage2Bitmap((BitmapImage)FilteredImage.Source);
+            byte[,,] array = ErrorDiffusion.Make(ErrorDiffusion.GetImageArray(bitmap), 2, isGrayScale, ChooseKernel.SelectedItem.ToString());
             FilteredImage.Source = Bitmap2BitmapImage(ErrorDiffusion.GetBitmapFromArray(array));
         }
 
@@ -457,8 +443,8 @@ namespace CG_Project1
                 FilteredImage.Source = ImageViewer.Source;
             }
 
-            var bitmap = BitmapImage2Bitmap((BitmapImage)FilteredImage.Source);
-            FilteredImage.Source = Bitmap2BitmapImage(popularity.PopularityQuantizationApply(bitmap, int.Parse(ColorsNumber.Text)));
+            Bitmap bitmap = BitmapImage2Bitmap((BitmapImage)FilteredImage.Source);
+            FilteredImage.Source = Bitmap2BitmapImage(Popularity.PopularityQuantizationApply(bitmap, int.Parse(ColorsNumber.Text)));
         }
 
     }

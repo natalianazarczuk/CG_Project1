@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace CG_Project1
 {
@@ -17,20 +9,20 @@ namespace CG_Project1
         {
             if (original != null)
             {
-                byte[,,] clonedArray = (byte[,,])original.Clone();
+                var clonedArray = (byte[,,]) original.Clone();
                 if (isGrayScale)
                 {
                     clonedArray = ConvertToGrayScale(clonedArray);
                 }
+
                 return Dither(clonedArray, factor, kernel);
             }
-            else
-            {
-                throw new NullReferenceException();
-            }
+
+            throw new NullReferenceException();
+
         }
 
-       private static byte[,,] Dither(byte[,,] ditherImage, int factor, string kernel)
+        private static byte[,,] Dither(byte[,,] ditherImage, int factor, string kernel)
        {
             switch(kernel)
             {
@@ -39,20 +31,18 @@ namespace CG_Project1
                     {
                         for (int x = 1; x < ditherImage.GetLength(1) - 1; x++)
                         {
-                            byte oldR = ditherImage[y, x, 0]; // R
-                            byte oldG = ditherImage[y, x, 1]; // G
-                            byte oldB = ditherImage[y, x, 2]; // B
-                            //
-                            byte newR = (byte)(Math.Round(factor * oldR / 255.0) * (255 / factor));
-                            byte newG = (byte)(Math.Round(factor * oldG / 255.0) * (255 / factor));
-                            byte newB = (byte)(Math.Round(factor * oldB / 255.0) * (255 / factor));
-                            //
-                            ditherImage[y, x, 0] = newR;
-                            ditherImage[y, x, 1] = newG;
-                            ditherImage[y, x, 2] = newB;
-                            //
-                            Error err = new Error(oldR - newR, oldG - newG, oldB - newB);
-                            //
+                            byte[] oldCol = new byte[3] { ditherImage[y, x, 0], ditherImage[y, x, 1], ditherImage[y, x, 2] };
+
+                            byte[] newCol = new byte[3] { (byte)(Math.Round(factor * oldCol[0] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[1] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[2] / 255.0) * (255 / factor))};
+
+                            ditherImage[y, x, 0] = newCol[0];
+                            ditherImage[y, x, 1] = newCol[1];
+                            ditherImage[y, x, 2] = newCol[2];
+
+                            int[] err = new int[3] { oldCol[0] - newCol[0], oldCol[1] - newCol[1], oldCol[2] - newCol[2] };
+
                             SetPx(ditherImage, x + 1, y, 7 / 16d, err);
                             SetPx(ditherImage, x - 1, y + 1, 3 / 16d, err);
                             SetPx(ditherImage, x, y + 1, 5 / 16d, err);
@@ -65,20 +55,18 @@ namespace CG_Project1
                     {
                         for (int x = 2; x < ditherImage.GetLength(1) - 2; x++)
                         {
-                            byte oldR = ditherImage[y, x, 0]; // R
-                            byte oldG = ditherImage[y, x, 1]; // G
-                            byte oldB = ditherImage[y, x, 2]; // B
-                            //
-                            byte newR = (byte)(Math.Round(factor * oldR / 255.0) * (255 / factor));
-                            byte newG = (byte)(Math.Round(factor * oldG / 255.0) * (255 / factor));
-                            byte newB = (byte)(Math.Round(factor * oldB / 255.0) * (255 / factor));
-                            //
-                            ditherImage[y, x, 0] = newR;
-                            ditherImage[y, x, 1] = newG;
-                            ditherImage[y, x, 2] = newB;
-                            //
-                            Error err = new Error(oldR - newR, oldG - newG, oldB - newB);
-                            //
+                            byte[] oldCol = new byte[3] { ditherImage[y, x, 0], ditherImage[y, x, 1], ditherImage[y, x, 2] };
+
+                            byte[] newCol = new byte[3] { (byte)(Math.Round(factor * oldCol[0] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[1] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[2] / 255.0) * (255 / factor))};
+
+                            ditherImage[y, x, 0] = newCol[0];
+                            ditherImage[y, x, 1] = newCol[1];
+                            ditherImage[y, x, 2] = newCol[2];
+
+                            int[] err = new int[3] { oldCol[0] - newCol[0], oldCol[1] - newCol[1], oldCol[2] - newCol[2] };
+
                             SetPx(ditherImage, x + 1, y, 8 / 32d, err);
                             SetPx(ditherImage, x + 2, y, 4 / 32d, err);
 
@@ -95,20 +83,18 @@ namespace CG_Project1
                     {
                         for (int x = 2; x < ditherImage.GetLength(1) - 2; x++)
                         {
-                            byte oldR = ditherImage[y, x, 0]; // R
-                            byte oldG = ditherImage[y, x, 1]; // G
-                            byte oldB = ditherImage[y, x, 2]; // B
-                            //
-                            byte newR = (byte)(Math.Round(factor * oldR / 255.0) * (255 / factor));
-                            byte newG = (byte)(Math.Round(factor * oldG / 255.0) * (255 / factor));
-                            byte newB = (byte)(Math.Round(factor * oldB / 255.0) * (255 / factor));
-                            //
-                            ditherImage[y, x, 0] = newR;
-                            ditherImage[y, x, 1] = newG;
-                            ditherImage[y, x, 2] = newB;
-                            //
-                            Error err = new Error(oldR - newR, oldG - newG, oldB - newB);
-                            //
+                            byte[] oldCol = new byte[3] { ditherImage[y, x, 0], ditherImage[y, x, 1], ditherImage[y, x, 2] };
+
+                            byte[] newCol = new byte[3] { (byte)(Math.Round(factor * oldCol[0] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[1] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[2] / 255.0) * (255 / factor))};
+
+                            ditherImage[y, x, 0] = newCol[0];
+                            ditherImage[y, x, 1] = newCol[1];
+                            ditherImage[y, x, 2] = newCol[2];
+
+                            int[] err = new int[3] { oldCol[0] - newCol[0], oldCol[1] - newCol[1], oldCol[2] - newCol[2] };
+                            
                             SetPx(ditherImage, x + 1, y, 8 / 42d, err);
                             SetPx(ditherImage, x + 2, y, 4 / 42d, err);
 
@@ -131,20 +117,18 @@ namespace CG_Project1
                     {
                         for (int x = 2; x < ditherImage.GetLength(1) - 2; x++)
                         {
-                            byte oldR = ditherImage[y, x, 0]; // R
-                            byte oldG = ditherImage[y, x, 1]; // G
-                            byte oldB = ditherImage[y, x, 2]; // B
-                            //
-                            byte newR = (byte)(Math.Round(factor * oldR / 255.0) * (255 / factor));
-                            byte newG = (byte)(Math.Round(factor * oldG / 255.0) * (255 / factor));
-                            byte newB = (byte)(Math.Round(factor * oldB / 255.0) * (255 / factor));
-                            //
-                            ditherImage[y, x, 0] = newR;
-                            ditherImage[y, x, 1] = newG;
-                            ditherImage[y, x, 2] = newB;
-                            //
-                            Error err = new Error(oldR - newR, oldG - newG, oldB - newB);
-                            //
+                            byte[] oldCol = new byte[3] { ditherImage[y, x, 0], ditherImage[y, x, 1], ditherImage[y, x, 2] };
+
+                            byte[] newCol = new byte[3] { (byte)(Math.Round(factor * oldCol[0] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[1] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[2] / 255.0) * (255 / factor))};
+
+                            ditherImage[y, x, 0] = newCol[0];
+                            ditherImage[y, x, 1] = newCol[1];
+                            ditherImage[y, x, 2] = newCol[2];
+
+                            int[] err = new int[3] { oldCol[0] - newCol[0], oldCol[1] - newCol[1], oldCol[2] - newCol[2] };
+
                             SetPx(ditherImage, x + 1, y, 5 / 32d, err);
                             SetPx(ditherImage, x + 2, y, 3 / 32d, err);
 
@@ -167,20 +151,18 @@ namespace CG_Project1
                     {
                         for (int x = 2; x < ditherImage.GetLength(1) - 2; x++)
                         {
-                            byte oldR = ditherImage[y, x, 0]; // R
-                            byte oldG = ditherImage[y, x, 1]; // G
-                            byte oldB = ditherImage[y, x, 2]; // B
-                            //
-                            byte newR = (byte)(Math.Round(factor * oldR / 255.0) * (255 / factor));
-                            byte newG = (byte)(Math.Round(factor * oldG / 255.0) * (255 / factor));
-                            byte newB = (byte)(Math.Round(factor * oldB / 255.0) * (255 / factor));
-                            //
-                            ditherImage[y, x, 0] = newR;
-                            ditherImage[y, x, 1] = newG;
-                            ditherImage[y, x, 2] = newB;
-                            //
-                            Error err = new Error(oldR - newR, oldG - newG, oldB - newB);
-                            //
+                            byte[] oldCol = new byte[3] { ditherImage[y, x, 0], ditherImage[y, x, 1], ditherImage[y, x, 2] };
+
+                            byte[] newCol = new byte[3] { (byte)(Math.Round(factor * oldCol[0] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[1] / 255.0) * (255 / factor)),
+                                (byte)(Math.Round(factor * oldCol[2] / 255.0) * (255 / factor))};
+
+                            ditherImage[y, x, 0] = newCol[0];
+                            ditherImage[y, x, 1] = newCol[1];
+                            ditherImage[y, x, 2] = newCol[2];
+
+                            int[] err = new int[3] { oldCol[0] - newCol[0], oldCol[1] - newCol[1], oldCol[2] - newCol[2] };
+                            
                             SetPx(ditherImage, x + 1, y, 1 / 8d, err);
                             SetPx(ditherImage, x + 2, y, 1 / 8d, err);
 
@@ -204,16 +186,16 @@ namespace CG_Project1
         }
 
 
-       private static void SetPx(byte[,,] img, int x, int y, double div, Error err)
+       private static void SetPx(byte[,,] img, int x, int y, double div, int[] err)
        {
-           double r = img[y, x, 0]; // R
-           double g = img[y, x, 1]; // G
-           double b = img[y, x, 2]; // B
-           //
-           r += err.r * div;
-           g += err.g * div;
-           b += err.b * div;
-           //
+           double r = img[y, x, 0];
+           double g = img[y, x, 1]; 
+           double b = img[y, x, 2]; 
+           
+           r += err[0] * div;
+           g += err[1] * div;
+           b += err[2] * div;
+           
            img[y, x, 0] = CheckSize(r);
            img[y, x, 1] = CheckSize(g);
            img[y, x, 2] = CheckSize(b);
@@ -221,22 +203,26 @@ namespace CG_Project1
 
        private static byte[,,] ConvertToGrayScale(byte[,,] imgArr)
        {
-           if (imgArr != null)
+           if (imgArr == null)
            {
-               byte[,,] gray = new byte[imgArr.GetLength(0), imgArr.GetLength(1), 3];
-               for (int i = 0; i < imgArr.GetLength(0); i++)
-               {
-                   for (int j = 0; j < imgArr.GetLength(1); j++)
-                   {
-                       byte grayScale = CheckSize(0.299 * imgArr[i, j, 0] + 0.587 * imgArr[i, j, 1] + 0.114 * imgArr[i, j, 2]);
-                       gray[i, j, 0] = grayScale;
-                       gray[i, j, 1] = grayScale;
-                       gray[i, j, 2] = grayScale;
-                   }
-               }
-               return gray;
+               return null;
            }
-           return null;
+
+           var gray = new byte[imgArr.GetLength(0), imgArr.GetLength(1), 3];
+           for (int i = 0; i < imgArr.GetLength(0); i++)
+           {
+               for (int j = 0; j < imgArr.GetLength(1); j++)
+               {
+                   var grayScale =
+                       CheckSize(0.299 * imgArr[i, j, 0] + 0.587 * imgArr[i, j, 1] + 0.114 * imgArr[i, j, 2]);
+
+                   gray[i, j, 0] = grayScale;
+                   gray[i, j, 1] = grayScale;
+                   gray[i, j, 2] = grayScale;
+               }
+           }
+
+           return gray;
        }
 
        private static byte CheckSize(double input) => CheckSize((int)Math.Round(input));
@@ -246,67 +232,44 @@ namespace CG_Project1
 
        public static byte[,,] GetImageArray(Bitmap bmp)
        {
-           Bitmap cloneBMP = (Bitmap)bmp.Clone();
-           if (cloneBMP != null)
+           var cloneBmp = (Bitmap) bmp.Clone();
+           if (cloneBmp.Width < 10 || cloneBmp.Height < 10)
            {
-               int _bmpHeight = cloneBMP.Height;
-               int _bmpWidth = cloneBMP.Width;
-               if (_bmpWidth > 10 && _bmpHeight > 10)
+               return null;
+           }
+
+           var arr= new byte[cloneBmp.Height, cloneBmp.Width, 3];
+           for (int i = 0; i < cloneBmp.Height; i++)
+           {
+               for (int j = 0; j < cloneBmp.Width; j++)
                {
-                   byte[,,] arr = new byte[_bmpHeight, _bmpWidth, 3];
-                   for (int i = 0; i < _bmpHeight; i++)
-                   {
-                       for (int j = 0; j < _bmpWidth; j++)
-                       {
-                           // For every pixel
-                           arr[i, j, 0] = cloneBMP.GetPixel(j, i).R;    // Red
-                           arr[i, j, 1] = cloneBMP.GetPixel(j, i).G;    // Green
-                           arr[i, j, 2] = cloneBMP.GetPixel(j, i).B;    // Blue
-                       }
-                   }
-                   //while (t1.IsAlive) ;
-                   return arr;
+                   arr[i, j, 0] = cloneBmp.GetPixel(j, i).R; 
+                   arr[i, j, 1] = cloneBmp.GetPixel(j, i).G; 
+                   arr[i, j, 2] = cloneBmp.GetPixel(j, i).B; 
                }
            }
-           return null;
+
+           return arr;
        }
 
        public static Bitmap GetBitmapFromArray(byte[,,] imgArray)
        {
-           if (imgArray != null)
+           if (imgArray == null || imgArray.GetLength(0) < 2 || imgArray.GetLength(1) < 2 ||
+               imgArray.GetLength(2) != 3)
            {
-               int _height = imgArray.GetLength(0);
-               int _width = imgArray.GetLength(1);
-               if (_height > 1 && _width > 1 && imgArray.GetLength(2) == 3)
+               return null;
+           }
+
+           var bmp = new Bitmap(imgArray.GetLength(1), imgArray.GetLength(0));
+           for (int y = 0; y < imgArray.GetLength(0); y++)
+           {
+               for (int x = 0; x < imgArray.GetLength(1); x++)
                {
-                   Bitmap bmp = new Bitmap(_width, _height);
-                   for (int y = 0; y < _height; y++)
-                   {
-                       for (int x = 0; x < _width; x++)
-                       {
-                           bmp.SetPixel(x, y, Color.FromArgb(255, imgArray[y, x, 0], imgArray[y, x, 1], imgArray[y, x, 2]));
-                       }
-                   }
-                   return bmp;
+                   bmp.SetPixel(x, y, Color.FromArgb(255, imgArray[y, x, 0], imgArray[y, x, 1], imgArray[y, x, 2]));
                }
            }
-           throw new NullReferenceException("Array is Null!");
+
+           return bmp;
        }
     }
-
-    class Error
-    {
-        public int r;
-        public int g;
-        public int b;
-
-        public Error(int r, int g, int b)
-        {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-        }
-    }
-
-
 }
